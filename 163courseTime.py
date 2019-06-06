@@ -145,7 +145,7 @@ if __name__ == "__main__":
             elif opt == "-c":
                 courseId = arg
             elif opt == "-f":
-                url = arg
+                createFile = True
             elif opt == "-h":
                 print(helpText)
                 sys.exit(0)
@@ -153,12 +153,13 @@ if __name__ == "__main__":
             print("必须有courseId")
             sys.exit(0)
         content = getTimeInfo(courseId)
+        print(content)
         if createFile:
             f = open(name, "w")
             f.write(content)
             f.close()
+            print("\n{} 已生成".format(name))
 
-        print(content)
     except Exception as e:
         print(str(e))
 
