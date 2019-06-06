@@ -141,7 +141,7 @@ batchId=1559655289189
                 totalTime += chapterTime
                 chapterTime = getTime(chapterTime)
                 content += "{}({})\n".format(chapterName, chapterTime)
-                pcontent += "{}  {}\n".format(my_format(chapterName+" ",19,'l','·'), chapterTime)
+                pcontent += "{}  {}\n".format(my_format(chapterName+" ",19,'l','+'), chapterTime)
                 for t in range(len(chapterList)):
                     sn, st = chapterList[t]
                     zh = len_zh(sn)
@@ -157,7 +157,7 @@ batchId=1559655289189
             traceback.print_exc()
             continue
     content += "总计,{}".format(getTime(totalTime))
-    pcontent += "{}  {}\n".format(my_format("总计 ",19,'l','·'),getTime(totalTime))
+    pcontent += "{}  {}\n".format(my_format("总计 ",19,'l','+'),getTime(totalTime))
     return (content,pcontent)
 
 # print("共:" + getTime(totalTime))
