@@ -1,9 +1,11 @@
 # *_*coding:utf-8 *_*
+# *_*coding:utf-8 *_*
 import  js2py
 import HackRequests
 import re
 import getopt,sys
 import requests
+import traceback
 def getTime(second:int)->str:
 
     m = second /60
@@ -55,6 +57,32 @@ def parse_raw(rawContent:str):
         #'_request' : lambda: request(method=method, url="https://study.163.com"+url, data=body,headers=headers)
     }
 
+
+def len_zh(data):
+    temp = re.findall('[^a-zA-Z0-9.]+', data)
+    count = 0
+    for i in temp:
+        count += len(i)
+    return (count)
+
+
+def my_format(str,width,align,sep=' '):#定义函数接受三个参数：要输出的字符串(str)、总占用宽度（int）、对齐方式（str:l、r、c对应左右中）
+	sigle=0
+	double=0
+	for i in str:#统计单字宽和双字宽的数目
+		if len(i.encode('gb2312'))==1:
+			sigle+=1
+		elif len(i.encode('gb2312'))==2:
+			double+=1
+	if align=='l':
+		return str+(width*2-sigle-double*2)*sep
+	elif align=='r':
+		return (width*2-sigle-double*2)*sep+str
+	elif align=='c':
+		return int((width*2-sigle-double*2)//2)*sep+str+int((width*2-sigle-double*2)-(width*2-sigle-double*2)//2)*sep
+
+
+
 def getTimeInfo(courseId):
     text = """POST /dwr/call/plaincall/PlanNewBean.getPlanCourseDetail.dwr HTTP/1.1
 Host: study.163.com
@@ -95,7 +123,7 @@ batchId=1559655289189
     context.execute(response.replace("\n", ""))
     totalTime = 0
     content = ""
-
+    pcontent = ""
 
     for i in range(200):
         try:
@@ -113,18 +141,24 @@ batchId=1559655289189
                 totalTime += chapterTime
                 chapterTime = getTime(chapterTime)
                 content += "{}({})\n".format(chapterName, chapterTime)
+                pcontent += "{}  {}\n".format(my_format(chapterName+" ",19,'l','·'), chapterTime)
                 for t in range(len(chapterList)):
                     sn, st = chapterList[t]
-                    content += "{},{}\n".format(sn, st)
-                content += "\n"
+                    zh = len_zh(sn)
 
+                    content += "{},{}\n".format(sn, st)
+                    pcontent += "{}{}\n".format(my_format(sn,20,'l'), st)
+                content += "\n"
+                pcontent += "\n"
         except Exception as e:
             if str(e) in ("'>' not supported between instances of 'NoneType' and 'int'","'int' object is not iterable"): continue
             if str(e).startswith("ReferenceError:"):continue
             print(e)
+            traceback.print_exc()
             continue
     content += "总计,{}".format(getTime(totalTime))
-    return content
+    pcontent += "{}  {}\n".format(my_format("总计 ",19,'l','·'),getTime(totalTime))
+    return (content,pcontent)
 
 # print("共:" + getTime(totalTime))
 if __name__ == "__main__":
@@ -136,7 +170,6 @@ if __name__ == "__main__":
 """
     createFile = False
     name = "time.csv"
-    courseId = None
     try:
         opts, args = getopt.getopt(sys.argv[1:], "-n:-f-c:-h", ["name=", "file","courseId="])
         for opt, arg in opts:
@@ -152,8 +185,8 @@ if __name__ == "__main__":
         if courseId is None :
             print("必须有courseId")
             sys.exit(0)
-        content = getTimeInfo(courseId)
-        print(content)
+        content,pcontent = getTimeInfo(courseId)
+        print(pcontent)
         if createFile:
             f = open(name, "w")
             f.write(content)
@@ -161,6 +194,6 @@ if __name__ == "__main__":
             print("\n{} 已生成".format(name))
 
     except Exception as e:
-        print(str(e))
+        traceback.print_exc()
 
 
