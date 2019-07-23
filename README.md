@@ -23,3 +23,11 @@ python 163courseTime.py -f -n -c 1004503010
 -n 文件的名称是什么
 -c 课程id
 ```
+
+## 2. html2anki
+从博客生成一张一张anki卡片
+anki需要安装ankiconnect的插件
+```
+python html2anki -u http://localhost:4000/posts/4a1b6862/
+-u 博客路径
+```
